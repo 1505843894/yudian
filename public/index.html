@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>多账号监控系统</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: "Microsoft YaHei", Arial, sans-serif;
+      background-color: #f5f5f5;
+      color: #333;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 24px;
+    }
+    h2 {
+      font-size: 18px;
+      margin-bottom: 10px;
+      color: #444;
+    }
+    h3 {
+      font-size: 16px;
+      margin: 10px 0;
+      color: #555;
+    }
+    .card {
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+    }
+    .info-line {
+      display: flex;
+      margin: 8px 0;
+      align-items: center;
+    }
+    .info-label {
+      width: 100px;
+      font-weight: bold;
+    }
+    .info-value {
+      flex: 1;
+    }
+    .status {
+      text-align: center;
+      margin: 10px 0;
+      font-weight: bold;
+      padding: 6px;
+      border-radius: 4px;
+      font-size: 14px;
+      display: inline-block;
+      min-width: 80px;
+    }
+    .success {
+      color: white;
+      background-color: #4caf50;
+    }
+    .error {
+      color: white;
+      background-color: #f44336;
+    }
+    .warning {
+      color: white;
+      background-color: #ff9800;
+    }
+    .neutral {
+      color: white;
+      background-color: #607d8b;
+    }
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(0, 0, 0, 0.1);
+      border-radius: 50%;
+      border-top-color: #1e88e5;
+      animation: spin 1s linear infinite;
+      margin-left: 10px;
+      vertical-align: middle;
+    }
+    @keyframes spin {
+      to {transform: rotate(360deg);}
+    }
+    .countdown {
+      color: #666;
+      margin: 5px 0;
+      font-size: 13px;
+    }
+    .token-preview {
+      font-family: monospace;
+      color: #555;
+      font-size: 12px;
+    }
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid #ddd;
+      margin-bottom: 20px;
+    }
+    .tab {
+      padding: 10px 20px;
+      cursor: pointer;
+      margin-right: 5px;
+      border-radius: 5px 5px 0 0;
+      background-color: #eee;
+    }
+    .tab.active {
+      background-color: #f9f9f9;
+      border: 1px solid #ddd;
+      border-bottom: none;
+      font-weight: bold;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .highlight {
+      font-weight: bold;
+      color: #f44336;
+    }
+    button {
+      background-color: #4caf50;
+      border: none;
+      color: white;
+      padding: 6px 12px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 14px;
+      margin: 4px 2px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    button.delete {
+      background-color: #f44336;
+    }
+    button.delete:hover {
+      background-color: #d32f2f;
+    }
+    button.small {
+      padding: 3px 8px;
+      font-size: 12px;
+      margin: 2px;
+    }
+    button.blue {
+      background-color: #2196f3;
+    }
+    button.blue:hover {
+      background-color: #0b7dda;
+    }
+    button.warning {
+      background-color: #ff9800;
+    }
+    button.warning:hover {
+      background-color: #e68900;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0;
+    }
+    table, th, td {
+      border: 1px solid #ddd;
+    }
+    th, td {
+      text-align: left;
+      padding: 8px;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 46px;
+      height: 24px;
+    }
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 24px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: #4caf50;
+    }
+    input:focus + .slider {
+      box-shadow: 0 0 1px #4caf50;
+    }
+    input:checked + .slider:before {
+      transform: translateX(22px);
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .summary-card {
+      background-color: #e8f5e9;
+      border-left: 5px solid #4caf50;
+      padding: 10px;
+      margin-bottom: 15px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 3px 7px;
+      font-size: 12px;
+      font-weight: bold;
+      border-radius: 10px;
+      background-color: #2196f3;
+      color: white;
+      margin-left: 5px;
+    }
+    .account-panel {
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+    .account-header {
+      padding: 10px;
+      background-color: #f0f0f0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .account-header:hover {
+      background-color: #e8e8e8;
+    }
+    .account-header h3 {
+      margin: 0;
+      flex: 1;
+    }
+    .account-body {
+      padding: 15px;
+      display: none;
+    }
+    .account-body.active {
+      display: block;
+    }
+    .account-status {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 10px;
+    }
+    .status-block {
+      text-align: center;
+      padding: 10px;
+      min-width: 120px;
+      border-radius: 5px;
+      background-color: #f5f5f5;
+    }
+    .flex-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .flex-item {
+      flex: 1;
+      min-width: 300px;
+    }
+    .soldout-item {
+      background-color: #fff8e1;
+      border: 1px solid #ffecb3;
+      border-radius: 5px;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>多账号监控系统</h1>
+    
+    <div class="tabs">
+      <div class="tab active" data-tab="dashboard">账号仪表盘</div>
+      <div class="tab" data-tab="accounts">账号管理</div>
+      <div class="tab" data-tab="soldout">售罄汇总</div>
+      <div class="tab" data-tab="system">系统监控</div>
+    </div>
+    
+    <div id="dashboard-tab" class="tab-content active">
+      <div class="card">
+        <div class="summary-card">
+          <div class="info-line">
+            <div class="info-label">在线账号:</div>
+            <div id="online-accounts-count" class="info-value">0</div>
+          </div>
+          <div class="info-line">
+            <div class="info-label">登录成功:</div>
+            <div id="login-success-count" class="info-value">0</div>
+          </div>
+          <div class="info-line">
+            <div class="info-label">发现售罄:</div>
+            <div id="soldout-count" class="info-value">0</div>
+          </div>
+          <div class="info-line">
+            <div class="info-label">操作:</div>
+            <div class="info-value">
+              <button id="push-sales-btn" class="small blue">推送销售数据</button>
+            </div>
+          </div>
+        </div>
+        
+        <h2>账号状态</h2>
+        <div id="accounts-status-list">
+          <!-- 账号状态面板将通过JS动态添加 -->
+        </div>
+      </div>
+    </div>
+    
+    <div id="accounts-tab" class="tab-content">
+      <div class="card">
+        <h2>账号管理</h2>
+        
+        <div class="info-line">
+          <div class="info-label">账号总数:</div>
+          <div id="accounts-count" class="info-value">-</div>
+        </div>
+        
+        <form id="add-account-form">
+          <div class="flex-container">
+            <div class="flex-item">
+              <div class="form-group">
+                <label for="account">账号:</label>
+                <input type="text" id="account" name="account" placeholder="请输入账号" required>
+              </div>
+            </div>
+            <div class="flex-item">
+              <div class="form-group">
+                <label for="pwd">密码:</label>
+                <input type="password" id="pwd" name="pwd" placeholder="请输入密码" required>
+              </div>
+            </div>
+          </div>
+          <button type="submit">添加账号</button>
+        </form>
+        
+        <div style="margin-top: 20px;">
+          <h3>账号列表</h3>
+          <table id="accounts-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>账号</th>
+                <th>启用状态</th>
+                <th>登录状态</th>
+                <th>上次使用时间</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- 账号数据将通过JS动态添加 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    
+    <div id="soldout-tab" class="tab-content">
+      <div class="card">
+        <h2>售罄商品汇总</h2>
+
+        <div class="summary-card">
+          <div class="info-line">
+            <div class="info-label">发现售罄:</div>
+            <div id="soldout-total" class="info-value">0</div>
+          </div>
+        </div>
+
+        <div id="all-soldout-list">
+          <table>
+            <thead>
+              <tr>
+                <th>账号</th>
+                <th>商品ID</th>
+                <th>上架状态</th>
+                <th>发现时间</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- 售罄商品列表将通过JS动态添加 -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div id="system-tab" class="tab-content">
+      <div class="card">
+        <h2>系统性能监控</h2>
+
+        <div class="summary-card">
+          <div class="info-line">
+            <div class="info-label">系统状态:</div>
+            <div class="info-value">
+              <span class="status success">运行正常</span>
+              <button id="refresh-system-btn" class="small blue">刷新数据</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex-container">
+          <div class="flex-item">
+            <h3>内存使用</h3>
+            <div id="memory-info">
+              <div class="info-line">
+                <div class="info-label">已用内存:</div>
+                <div id="heap-used" class="info-value">-</div>
+              </div>
+              <div class="info-line">
+                <div class="info-label">总内存:</div>
+                <div id="heap-total" class="info-value">-</div>
+              </div>
+              <div class="info-line">
+                <div class="info-label">外部内存:</div>
+                <div id="external-memory" class="info-value">-</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex-item">
+            <h3>系统信息</h3>
+            <div id="system-info">
+              <div class="info-line">
+                <div class="info-label">运行时间:</div>
+                <div id="uptime" class="info-value">-</div>
+              </div>
+              <div class="info-line">
+                <div class="info-label">活跃线程:</div>
+                <div id="active-workers" class="info-value">-</div>
+              </div>
+              <div class="info-line">
+                <div class="info-label">启用账号:</div>
+                <div id="enabled-accounts" class="info-value">-</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex-item">
+            <h3>任务间隔</h3>
+            <div id="intervals-info">
+              <div class="info-line">
+                <div class="info-label">登录间隔:</div>
+                <div id="login-interval" class="info-value">-</div>
+              </div>
+              <div class="info-line">
+                <div class="info-label">售罄检查:</div>
+                <div id="soldout-interval" class="info-value">-</div>
+              </div>
+              <div class="info-line">
+                <div class="info-label">销售查询:</div>
+                <div id="sales-interval" class="info-value">-</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex-item">
+            <h3>推送设置</h3>
+            <div id="push-info">
+              <div class="info-line">
+                <div class="info-label">推送时间:</div>
+                <div id="push-schedule" class="info-value">-</div>
+              </div>
+              <div class="info-line">
+                <div class="info-label">静默时段:</div>
+                <div id="quiet-hours" class="info-value">-</div>
+              </div>
+              <div class="info-line">
+                <div class="info-label">检查间隔:</div>
+                <div id="push-check-interval" class="info-value">-</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html> 

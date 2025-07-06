@@ -1,0 +1,17 @@
+{
+  "name": "api-request-app",
+  "version": "1.0.0",
+  "description": "用于执行POST请求的Web应用",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "axios": "^1.9.0",
+    "axios-socks5-agent": "^1.0.5",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "got": "^14.4.7",
+    "socks-proxy-agent": "^8.0.5"
+  }
+}
